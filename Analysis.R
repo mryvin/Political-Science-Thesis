@@ -273,25 +273,21 @@ data2019write$SDpredict = SDtest2
 ########################################################################################################################################
 ###### GUE.NGL
 ########################################################################################################################################
-GUE.NGLdata = subset(Odata,select=c(COUNTRY.))
+GUE.NGLdata <- Odata %>% select(COUNTRY.)
 
 for(i in 1:ncol(data)) {
-  cat('\n',names(data[i]))
-  model = lm(data$GUE.NGL.2014 ~ data[ , i])
-  cat('\np-value: ',summary(model)$coefficients[2,4],'\n')
+  model <- lm(GUE.NGL.2014 ~ .[ , i], data = data)
   if(summary(model)$coefficients[2,4] < 0.2) {
-    print('!!!!!!!!!!')
-    GUE.NGLdata = cbind(GUE.NGLdata, data[i])
+    GUE.NGLdata <- cbind(GUE.NGLdata, data[ , i])
   }
 }
 
+GUE.NGLredata <- GUE.NGLdata %>% 
+  select(-c(COUNTRY.,ECR.EFDD.2014,X2014..EU..Energy.supply.1)) %>% 
+  select_if(~!any(is.na(.)))
 
-GUE.NGLredata = subset(GUE.NGLdata,select=-c(COUNTRY.,ECR.EFDD.2014,X2014..EU..Energy.supply.1 ))
-GUE.NGLredata = GUE.NGLredata[ , apply(GUE.NGLredata, 2, function(x) !any(is.na(x)))]
-GUE.NGLmodstart = lm(data$GUE.NGL.2014 ~ 1, data = GUE.NGLredata)
-GUE.NGLmod = lm(data$GUE.NGL.2014 ~ ., data = GUE.NGLredata)
-summary(GUE.NGLmodstart)
-summary(GUE.NGLmod)
+GUE.NGLmodstart <- lm(GUE.NGL.2014 ~ 1, data = GUE.NGLredata)
+GUE.NGLmod <- lm(GUE.NGL.2014 ~ ., data = GUE.NGLredata)
 
 step(GUE.NGLmodstart, direction = 'forward', scope = formula(GUE.NGLmod))
 
